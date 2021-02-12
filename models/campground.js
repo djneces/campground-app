@@ -3,9 +3,12 @@ const Schema = mongoose.Schema //to shorten up the code
 
 const CampgroundSchema = new Schema ({
     title: String,
-    price: String,
+    image: String,
+    price: Number,
     description: String,
     location: String,
 })
 
 module.exports = mongoose.model('Campground', CampgroundSchema)
+
+
