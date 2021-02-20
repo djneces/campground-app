@@ -3,7 +3,8 @@
         <h1 class="text-center">New Campground</h1>
         <div class="col-6 offset-3">
             <!-- novalidate from the browser, bootstrap takes control  -->
-            <form action="/campgrounds" method="post" novalidate class="validated-form">
+            <!-- enctype to upload pictures -->
+            <form action="/campgrounds" method="post" novalidate class="validated-form" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="form-label" for="title">Title</label>
                     <!-- grouping[] content in campground object = in req.body  -->
@@ -20,13 +21,13 @@
                         Looks good!
                     </div>
                 </div>
-                <div class="mb-3">
+                <!-- <div class="mb-3">
                     <label class="form-label" for="image">Image Url</label>
                     <input  class="form-control" type="text" id="image" name="campground[image]" required>
                     <div class="valid-feedback">
                         Looks good!
                     </div>
-                </div>
+                </div> -->
                 <div class="mb-3">
                     <label class="form-label" for="price">Campground Price</label>
                     <div class="input-group">
@@ -45,6 +46,13 @@
                         Looks good!
                     </div>
                 </div>
+
+                    <!-- multiple for multiple files upload -->
+                    <div class="mb-3  custom-file">
+                        <label for="image" class="form-label custom-file-label">Choose image(s)...</label>
+                        <input class="form-control" type="file" id="image" name="image" multiple>
+                    </div>
+                    
                 <div class="mb-3">
                     <button class="btn btn-success">Add Campground</button>
                 </div>

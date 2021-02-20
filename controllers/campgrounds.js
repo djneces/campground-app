@@ -1,4 +1,5 @@
 const Campground = require('../models/campground')
+const { cloudinary } = require('../cloudinary')
 
 module.exports.index = async (req, res) => {
     const campgrounds = await Campground.find({})
@@ -13,9 +14,10 @@ module.exports.createCampground = async (req, res, next) => {
     //if I dont send the data I'm supposed to = e.g. via Postman
     // if(!req.body.campground) throw new ExpressError('Invalid Campground Data', 400) -basic
     const campground = new Campground(req.body.campground)
+    campground.images = req.files.map(f => ({ url: f.path, filename: f.filename})) //req.files is an array from multer
     campground.author = req.user._id
     await campground.save()
-
+ 
     req.flash('success', 'Successfully made a new campground.')//flash message
     res.redirect(`/campgrounds/${campground._id}`) 
 }
@@ -35,7 +37,7 @@ module.exports.showCampground = async (req, res) => {
         }
        })
         .populate('author') //populate shows reviews what are stored as Id in campground
-        console.log(campground);
+     
     //if campground not found under given id
     if(!campground) {
         req.flash('error', 'Cannot find that campground.')
@@ -56,7 +58,23 @@ module.exports.renderEditForm = async (req, res) => {
 
 module.exports.updateCampground = async (req, res) => {
     const { id } = req.params 
+    console.log(req.body)
     const campground = await Campground.findByIdAndUpdate(id,{...req.body.campground}) // {title:'sss', location:'ddd'}, 2nd param is new values
+    const imgs = req.files.map(f => ({ url: f.path, filename: f.filename}))//creates an array
+    campground.images.push(...imgs) //push
+    await campground.save()
+
+    
+    if(req.body.deleteImages) {
+        //deletes img from cloudinary
+        for(let filename of req.body.deleteImages) {
+           await cloudinary.uploader.destroy(filename)
+        }
+        //deletes img from mongodb
+      await campground.updateOne({$pull: {images: {filename: {$in: req.body.deleteImages}}}})//deletes from [images] only images from [delete images]
+      console.log(campground)
+    }
+
     req.flash('success', 'Successfully updated campground.')
     res.redirect(`/campgrounds/${campground._id}`)
 }

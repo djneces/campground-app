@@ -3,20 +3,23 @@ const router = express.Router()
 const campgrounds = require('../controllers/campgrounds')
 const catchAsync = require('../utils/catchAsync')
 const { isLoggedIn, isAuthor, validateCampground } = require('../middleware')
-const ExpressError = require('../utils/ExpressError')
+const multer  = require('multer')
+const {storage} = require ('../cloudinary')
+const upload = multer({ storage })  //use storage from /cloudinary
 
 
 // ***** ROUTES ****
  router.route('/')
         .get(catchAsync(campgrounds.index)) //controllers/campgrounds
         //wrapping func with catchAsync from utils - catches errors
-        .post(isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground))
+        .post(isLoggedIn, upload.array('image'), validateCampground, catchAsync(campgrounds.createCampground)) //in production we should first validate prior uploading imgs
+     
         
  router.get('/new', isLoggedIn, campgrounds.renderNewForm)
  
  router.route('/:id')
         .get(isLoggedIn, catchAsync(campgrounds.showCampground))
-        .put(isLoggedIn, isAuthor, validateCampground, catchAsync(campgrounds.updateCampground))
+        .put(isLoggedIn, isAuthor, upload.array('image'), validateCampground, catchAsync(campgrounds.updateCampground))
         .delete(isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground))
 
  
