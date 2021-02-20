@@ -1,8 +1,12 @@
 <% layout('layouts/boilerplate') %>
 <link rel="stylesheet" href="/stylesheets/stars.css">
+
 <div class="row">
     <div class="col-6">
+        <!-- map  -->
+        <div id='map' style='width: 400px; height: 300px;'></div>
 
+        <!-- carousel  -->
         <div id="campgroundCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
 
@@ -108,3 +112,12 @@
     </div>
 </div>
 
+<script>
+    //ejs reference doesnt work in showPageMap.js, have to connect via var
+    //handing off from the server side to the client side
+    const mapToken = '<%-process.env.MAPBOX_TOKEN %>'
+    const campground = <%- JSON.stringify(campground) %> //was not valid js format -> JSON
+</script>
+
+<!-- external Mapbox script  -->
+<script src="/javascripts/showPageMap.js"></script>

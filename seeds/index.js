@@ -35,6 +35,10 @@ const seedDB = async () => {
             images: { url:'https://source.unsplash.com/collection/483251'},
             description: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tempora quae nemo harum optio voluptas dolor incidunt ex quis, saepe excepturi.',
             price: price, 
+            geometry: {
+                type: "Point",
+                coordinates: [-113.1331, 47.0202]
+            }
         })
         await camp.save()
     }

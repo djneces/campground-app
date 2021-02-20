@@ -1,4 +1,9 @@
 const Campground = require('../models/campground')
+
+const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding')
+const mapBoxToken = process.env.MAPBOX_TOKEN
+const geoCoder = mbxGeocoding({accessToken: mapBoxToken})
+
 const { cloudinary } = require('../cloudinary')
 
 module.exports.index = async (req, res) => {
@@ -11,9 +16,16 @@ module.exports.index = async (req, res) => {
 }
 
 module.exports.createCampground = async (req, res, next) => { 
+    //geocoding Mapbox API, here could be error handling if we dont get any data(mistyped city e.g.)
+    const geoData = await geoCoder.forwardGeocode({
+        query: req.body.campground.location,
+        limit: 1 //1 result
+    }).send()
+ 
     //if I dont send the data I'm supposed to = e.g. via Postman
     // if(!req.body.campground) throw new ExpressError('Invalid Campground Data', 400) -basic
     const campground = new Campground(req.body.campground)
+    campground.geometry = geoData.body.features[0].geometry
     campground.images = req.files.map(f => ({ url: f.path, filename: f.filename})) //req.files is an array from multer
     campground.author = req.user._id
     await campground.save()
