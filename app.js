@@ -70,6 +70,7 @@ passport.deserializeUser(User.deserializeUser())
 
 // ***** MIDDLEWARE ****
 app.use((req, res, next) => {
+    //CURRENT USER
     res.locals.currentUser = req.user //req.user from passport, we use currentUser in navbar.ejs, res.local variable available in all templates
     res.locals.success = req.flash('success') //on every single request we have access to local variable (under the key success)
     res.locals.error = req.flash('error') 

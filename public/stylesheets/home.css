@@ -1,0 +1,46 @@
+body {
+    height: 100vh;
+    background-image: linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)),
+    url('https://images.unsplash.com/photo-1476041800959-2f6bb412c8ce?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=2550&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    text-shadow: 0 .05rem .1rem rgba(0,0,0,.5);
+    box-shadow: 0 0 5rem rgba(0,0,0,.5);
+}
+
+main.home {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.cover-container {
+    width: 60vw;
+}
+
+.nav-link {
+    padding: 0.25rem 0;
+    font-weight: 700;
+    color: rgba(255, 255, 255, .5);
+    margin-left: 1rem;
+    border-bottom:  .25rem solid transparent;
+}
+
+.nav-link:hover {
+    color: rgba(255, 255, 255, .5);
+    border-bottom-color: rgba(255, 255, 255, .5);
+}
+
+.nav-link.active {
+    color: white;
+    border-bottom-color: white;
+}
+}
+
+.btn-secondary, .btn-secondary:hover {
+    color: #333 !important;
+    text-shadow: none;
+}
