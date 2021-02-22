@@ -12,6 +12,9 @@ ImageSchema.virtual('thumbnail').get(function () { //virtual property, img.thumb
   return this.url.replace('/upload', '/upload/w_200')  //add w_200 so they imgs appear as thumbnails, url specified by Cloudinary
 })
 
+//to JSON 
+const options = {toJSON: {virtuals: true}} //need this to have virtual property appear in the object in the console!!! when stringified
+
 const CampgroundSchema = new Schema ({
     title: String,
     images: [ImageSchema], //moved to separate Schema
@@ -39,7 +42,16 @@ const CampgroundSchema = new Schema ({
             ref: 'Review',  //object id from review model
         }
     ]
-})
+}, options) //pass the options
+
+CampgroundSchema.virtual('properties.popUpMarkup').get(function () { //virtual property, its not stored in the DB, its just virtual
+    return `
+    <strong><a href='/campgrounds/${this._id}'>${this.title}</a></strong>
+    ${/* truncates to 20 chars */ ""}
+    <p>${this.description.substring(0,20)}...</p> 
+    
+    ` //properties.x as per clusterMap format
+  })
 
 //mongoose middleware to delete associated reviews afterwards we delete a campground
 //follows findOneAndDelete in delete route for campgrounds, if I change this method, I need to change here too
