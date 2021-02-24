@@ -1,6 +1,7 @@
 if(process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
 } //environment variables in production (process.env.SECRET)
+// test production mode : NODE_ENV=production node app.js 
 
 console.log(process.env.SECRET) 
 
@@ -18,6 +19,9 @@ const User = require('./models/user')
 const userRoutes = require('./routes/users')
 const reviewRoutes = require('./routes/reviews')
 const campgroundRoutes = require('./routes/campgrounds')
+
+const helmet = require('helmet')
+const mongoSanitize = require('express-mongo-sanitize')
 
 
 // ***** DB CONNECTION VIA MONGOOSE ****
@@ -43,22 +47,74 @@ app.set('views', path.join(__dirname, 'views'))// so I can start the app from an
 app.use(express.urlencoded({extended: true})) // to parser req.body - get info from the form
 app.use(methodOverride('_method')) // to use PUT in the form
 app.use(express.static(path.join(__dirname, 'public'))) //serving static files
+app.use(mongoSanitize())//mongo sanitizer
 
 // ***** SESSIONS ****
 const sessionConfig = {
+    name: 'session', //I name it, prevents attacking standard nam connect.sid
     secret: 'thisshouldbeasecret',
     resave: false,
     saveUninitialized: true,
     cookie: {
-        httpOnly: true,
+        httpOnly: true, //only accessible over http, not JavaScript - protection
+        // secure: true, //works ONLY on https
         expires: Date.now() + 1000 * 60 * 60 * 24 * 7, //plus 1 week
         maxAge: 1000 * 60 * 60 * 24 * 7,
     }
 }
-app.use(session(sessionConfig)) //before passport.session
 
+// ***** SESSION ****
+app.use(session(sessionConfig)) //before passport.session
 // ***** FLASH ****
 app.use(flash())
+// ***** HELMET ****
+app.use(helmet())
+
+const scriptSrcUrls = [
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://api.mapbox.com/",
+    "https://kit.fontawesome.com/",
+    "https://cdnjs.cloudflare.com/",
+    "https://cdn.jsdelivr.net",
+];
+const styleSrcUrls = [
+    "https://cdn.jsdelivr.net",
+    "https://kit-free.fontawesome.com/",
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.mapbox.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://fonts.googleapis.com/",
+    "https://use.fontawesome.com/",
+];
+const connectSrcUrls = [
+    "https://api.mapbox.com/",
+    "https://a.tiles.mapbox.com/",
+    "https://b.tiles.mapbox.com/",
+    "https://events.mapbox.com/",
+];
+const fontSrcUrls = [];
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "'self'",
+                "blob:",
+                "data:",
+                "https://res.cloudinary.com/dxmhn2we7/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
+                "https://images.unsplash.com/",
+                "https://source.unsplash.com/",
+            ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
 
 // ***** PASSPORT ****
 app.use(passport.initialize())
@@ -70,6 +126,7 @@ passport.deserializeUser(User.deserializeUser())
 
 // ***** MIDDLEWARE ****
 app.use((req, res, next) => {
+
     //CURRENT USER
     res.locals.currentUser = req.user //req.user from passport, we use currentUser in navbar.ejs, res.local variable available in all templates
     res.locals.success = req.flash('success') //on every single request we have access to local variable (under the key success)

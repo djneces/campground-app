@@ -19,5 +19,5 @@
         )
         .addTo(map)
 
-
+        
         //rest of the code = server side => controllers/campgrounds.js
