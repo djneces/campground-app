@@ -3,7 +3,6 @@ if(process.env.NODE_ENV !== 'production') {
 } //environment variables in production (process.env.SECRET)
 // test production mode : NODE_ENV=production node app.js 
 
-console.log(process.env.SECRET) 
 
 const express = require('express')
 const path = require('path')
@@ -23,9 +22,11 @@ const campgroundRoutes = require('./routes/campgrounds')
 const helmet = require('helmet')
 const mongoSanitize = require('express-mongo-sanitize')
 
+const MongoStore = require('connect-mongo').default;
 
 // ***** DB CONNECTION VIA MONGOOSE ****
-mongoose.connect('mongodb://localhost:27017/yelp-camp', {
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp'
+mongoose.connect(dbUrl, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
@@ -50,9 +51,22 @@ app.use(express.static(path.join(__dirname, 'public'))) //serving static files
 app.use(mongoSanitize())//mongo sanitizer
 
 // ***** SESSIONS ****
+const secret = process.env.SECRET || 'thisshouldbeasecret'
+
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    secret: secret,
+    touchAfter: 24 * 60 * 60
+})
+
+store.on('error', function(e) {
+    console.log('SESSION STORE ERROR', e);
+})
+
 const sessionConfig = {
+    store,
     name: 'session', //I name it, prevents attacking standard nam connect.sid
-    secret: 'thisshouldbeasecret',
+    secret: secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
